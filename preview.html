@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leather Live Preview</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #161312; color: #fff; font: 15px/1.4 Arial, sans-serif; }
+      .phone { position: relative; width: min(100vw, 420px); height: 100vh; overflow: hidden; background: radial-gradient(circle at 75% 27%, #c9996d 0 4%, transparent 5%), linear-gradient(138deg, #2b1a12 0 31%, #845234 32% 47%, #23130d 48% 100%); }
+      .phone::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.44), transparent 38%, rgba(0,0,0,.88)); pointer-events: none; }
+      header, .product, .chat { position: relative; z-index: 1; }
+      header { display: flex; justify-content: space-between; padding: 18px; }
+      .pill { border-radius: 999px; padding: 8px 12px; background: rgba(0,0,0,.45); backdrop-filter: blur(8px); font-size: 13px; }
+      .dot { display: inline-block; width: 8px; height: 8px; background: #ff3b30; border-radius: 50%; margin-right: 7px; }
+      .product { margin: 0 18px 0 auto; width: 235px; display: flex; gap: 11px; padding: 9px; border-radius: 18px; background: rgba(255,255,255,.95); color: #241814; box-shadow: 0 10px 30px #0006; }
+      .wallet { width: 64px; height: 64px; flex: none; border-radius: 12px; background: linear-gradient(135deg, #d5a16c, #5b331d); border: 2px solid #8a5635; }
+      .product b { display: block; font-size: 14px; } .price { color: #047857; margin-top: 4px; font-weight: bold; } .stock { font-size: 12px; color: #666; }
+      .chat { position: absolute; bottom: 0; width: 100%; padding: 72px 16px 18px; background: linear-gradient(transparent, rgba(0,0,0,.92) 38%); }
+      .hint { font-weight: bold; font-size: 14px; margin-bottom: 14px; } .msg { margin: 9px 0; text-shadow: 0 1px 2px #000; } .name { color: #fcd34d; font-weight: bold; }
+      form { display: flex; gap: 8px; margin-top: 15px; } input { flex: 1; border: 1px solid #ffffff44; border-radius: 999px; padding: 13px 15px; color: white; background: #ffffff20; outline: none; } button { border: 0; width: 46px; border-radius: 50%; background: #fbbf24; font-size: 17px; cursor: pointer; }
+      .small { margin: 8px 0 0; font-size: 12px; color: #bbb; }
+    </style>
+  </head>
+  <body>
+    <main class="phone">
+      <header><div class="pill"><span class="dot"></span>Live</div><div class="pill">👁 128</div></header>
+      <section class="product"><div class="wallet"></div><div><b>Handmade Leather Wallet</b><div class="price">$40</div><div class="stock">Only 5 in stock</div></div></section>
+      <section class="chat"><div class="hint">🔊 AI host is here to help</div><div class="msg"><span class="name">Leather Live:</span> Hi! Ask me anything about today’s handmade wallets.</div><div class="msg"><span class="name">Maya:</span> Is it durable for daily use?</div><div class="msg"><span class="name">Leather Live:</span> Absolutely! It’s handmade for everyday use and made to last.</div><form><input placeholder="Ask about the wallet…" /><button aria-label="Send">➤</button></form><p class="small">🛍 Tap Go live to connect the avatar.</p></section>
+    </main>
+  </body>
+</html>
