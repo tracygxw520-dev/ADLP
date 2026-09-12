@@ -18,11 +18,11 @@ class ContentProductionApiException implements Exception {
   String toString() => message;
 }
 
-/// Client for PawSnap's content-production API.
+/// Client for Gema Snap's content-production API.
 ///
-/// The API accepts an uploaded product image, then returns generated marketing
-/// copy along with poster and video URLs. Pass [baseUri] in tests or when the
-/// API is hosted somewhere other than [AppConfig.apiBaseUri].
+/// The API accepts an uploaded product image, then returns generated poster
+/// and video URLs. Pass [baseUri] in tests or when the API is hosted somewhere
+/// other than [AppConfig.apiBaseUri].
 class ContentProductionApi {
   ContentProductionApi({http.Client? client, Uri? baseUri})
       : _client = client ?? http.Client(),
@@ -33,7 +33,9 @@ class ContentProductionApi {
   final bool _ownsClient;
   final Uri _baseUri;
 
-  static const _timeout = Duration(minutes: 3);
+  // Sora generation is asynchronous on the provider side and the current
+  // backend waits for it before returning the completed asset URLs.
+  static const _timeout = Duration(minutes: 8);
 
   Future<ContentProduction> create(
     CreateContentProductionRequest request,

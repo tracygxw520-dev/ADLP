@@ -1,22 +1,31 @@
 /// Lifecycle states returned by the campaign-generation API.
-enum ContentProductionStatus { pending, generating, completed, failed, unknown }
+enum ContentProductionStatus {
+  pending,
+  generating,
+  completed,
+  partial,
+  failed,
+  unknown,
+}
 
 extension ContentProductionStatusX on ContentProductionStatus {
   String get label => switch (this) {
-        ContentProductionStatus.pending => 'Queued',
-        ContentProductionStatus.generating => 'Generating',
-        ContentProductionStatus.completed => 'Complete',
-        ContentProductionStatus.failed => 'Needs attention',
-        ContentProductionStatus.unknown => 'Unknown',
-      };
+    ContentProductionStatus.pending => 'Queued',
+    ContentProductionStatus.generating => 'Generating',
+    ContentProductionStatus.completed => 'Complete',
+    ContentProductionStatus.partial => 'Poster ready',
+    ContentProductionStatus.failed => 'Needs attention',
+    ContentProductionStatus.unknown => 'Unknown',
+  };
 
   static ContentProductionStatus fromWire(String value) => switch (value) {
-        'pending' => ContentProductionStatus.pending,
-        'generating' => ContentProductionStatus.generating,
-        'completed' => ContentProductionStatus.completed,
-        'failed' => ContentProductionStatus.failed,
-        _ => ContentProductionStatus.unknown,
-      };
+    'pending' => ContentProductionStatus.pending,
+    'generating' => ContentProductionStatus.generating,
+    'completed' => ContentProductionStatus.completed,
+    'partial' => ContentProductionStatus.partial,
+    'failed' => ContentProductionStatus.failed,
+    _ => ContentProductionStatus.unknown,
+  };
 }
 
 /// Payload used to start a generated marketing campaign.
@@ -48,7 +57,10 @@ class CreateContentProductionRequest {
   }
 }
 
-/// A campaign and its generated copy and media assets.
+/// A campaign and its generated visual assets.
+///
+/// The nullable copy fields remain for compatibility with earlier API records;
+/// Gema Snap now presents only the generated poster and video.
 class ContentProduction {
   const ContentProduction({
     required this.id,
@@ -104,7 +116,9 @@ class ContentProduction {
         _string(json['status'])?.toLowerCase() ?? '',
       ),
       errorMessage: _string(json['error_message']),
-      createdAt: createdAtValue == null ? null : DateTime.tryParse(createdAtValue),
+      createdAt: createdAtValue == null
+          ? null
+          : DateTime.tryParse(createdAtValue),
     );
   }
 

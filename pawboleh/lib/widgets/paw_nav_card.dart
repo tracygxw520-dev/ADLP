@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
-import 'cat_mascot.dart';
 import 'glass_card.dart';
 
 /// The large glassmorphism navigation cards used on the Dashboard,
-/// e.g. "Paw Live" and "Paw Snap" — each fronted by the cat mascot
-/// holding the tool the card represents.
+/// e.g. "Gema Live" and "Gema Snap" — each uses a lightweight tool glyph.
 class PawNavCard extends StatelessWidget {
   const PawNavCard({
     super.key,
     required this.title,
     required this.subtitle,
-    required this.prop,
+    required this.icon,
     required this.gradient,
     required this.onTap,
     required this.semanticLabel,
@@ -19,7 +17,7 @@ class PawNavCard extends StatelessWidget {
 
   final String title;
   final String subtitle;
-  final CatProp prop;
+  final IconData icon;
   final Gradient gradient;
   final VoidCallback onTap;
   final String semanticLabel;
@@ -30,13 +28,15 @@ class PawNavCard extends StatelessWidget {
       width: double.infinity,
       child: GlassCard(
         gradient: gradient,
-        borderRadius: 28,
+        borderRadius: 24,
         padding: const EdgeInsets.all(20),
         tintOpacity: 0.85,
         onTap: onTap,
         semanticLabel: semanticLabel,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: AppSpacing.minTouchTarget + 50),
+          constraints: const BoxConstraints(
+            minHeight: AppSpacing.minTouchTarget + 50,
+          ),
           child: Row(
             children: [
               Expanded(
@@ -46,7 +46,9 @@ class PawNavCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: AppTextStyles.cardTitle.copyWith(color: Colors.white),
+                      style: AppTextStyles.cardTitle.copyWith(
+                        color: Colors.white,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -57,7 +59,10 @@ class PawNavCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(14),
@@ -73,7 +78,15 @@ class PawNavCard extends StatelessWidget {
                   ],
                 ),
               ),
-              CatMascot(size: 68, prop: prop),
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 30, color: Colors.white),
+              ),
             ],
           ),
         ),

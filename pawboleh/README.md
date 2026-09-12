@@ -1,8 +1,7 @@
-# PawBoleh
+# Gema
 
-PawBoleh is a Flutter UI for fashion MSMEs. Its Paw Snap tab turns a product
-photo and short product brief into marketing copy, a poster, and (when the
-configured generator provides one) a promo video.
+Gema is a Flutter UI for fashion MSMEs. Its Gema Snap tab turns a product
+photo and creative brief into an AI-generated poster and promo video.
 
 ## Run Paw Snap locally
 

@@ -14,9 +14,10 @@ Future<T?> showSlideInPanel<T>(BuildContext context, Widget child) {
       child: Material(color: Colors.transparent, child: child),
     ),
     transitionBuilder: (_, animation, _, child) {
-      final offset = Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero).animate(
-        CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-      );
+      final offset = Tween<Offset>(
+        begin: const Offset(1, 0),
+        end: Offset.zero,
+      ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic));
       return SlideTransition(position: offset, child: child);
     },
   );

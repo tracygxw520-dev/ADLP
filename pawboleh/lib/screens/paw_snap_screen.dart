@@ -1,6 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/content_production.dart';
@@ -11,8 +13,8 @@ import '../widgets/remote_image.dart';
 
 enum _GenState { empty, loading, ready, failed }
 
-/// Paw Snap turns a product photo and a short brief into campaign-ready media.
-/// The visual language deliberately matches the surrounding PawBoleh UI.
+/// Gema Snap turns a product photo and a creative brief into AI-generated
+/// media while using the same visual language as the surrounding Gema UI.
 class PawSnapView extends StatefulWidget {
   const PawSnapView({super.key});
 
@@ -76,7 +78,9 @@ class _PawSnapViewState extends State<PawSnapView> {
         _state = _GenState.empty;
       });
     } catch (_) {
-      if (mounted) _showMessage('Could not open your photos. Please try again.');
+      if (mounted) {
+        _showMessage('Could not open your photos. Please try again.');
+      }
     }
   }
 
@@ -88,11 +92,13 @@ class _PawSnapViewState extends State<PawSnapView> {
       return;
     }
     if (name.length < 2) {
-      _showMessage('Add a product name so Paw Snap can create the campaign.');
+      _showMessage('Add a product name so Gema Snap can create the visuals.');
       return;
     }
     if (description.length < 10) {
-      _showMessage('Add a little more product detail (at least 10 characters).');
+      _showMessage(
+        'Add a little more product detail (at least 10 characters).',
+      );
       return;
     }
 
@@ -117,9 +123,7 @@ class _PawSnapViewState extends State<PawSnapView> {
       if (!mounted || requestId != _requestId) return;
       setState(() {
         _production = production;
-        _state = production.status == ContentProductionStatus.failed
-            ? _GenState.failed
-            : _GenState.ready;
+        _state = _stateForProduction(production);
         _errorMessage = production.errorMessage;
       });
     } on ContentProductionApiException catch (error) {
@@ -133,7 +137,7 @@ class _PawSnapViewState extends State<PawSnapView> {
       setState(() {
         _state = _GenState.failed;
         _errorMessage =
-            'Paw Snap could not reach the campaign service. Check that the API is running, then try again.';
+            'Gema Snap could not reach the campaign service. Check that the API is running, then try again.';
       });
     }
   }
@@ -148,16 +152,14 @@ class _PawSnapViewState extends State<PawSnapView> {
       if (!mounted || requestId != _requestId) return;
       setState(() {
         _production = production;
-        _state = production.status == ContentProductionStatus.failed
-            ? _GenState.failed
-            : _GenState.ready;
+        _state = _stateForProduction(production);
         _errorMessage = production.errorMessage;
       });
     } on ContentProductionApiException catch (error) {
       if (mounted && requestId == _requestId) _showMessage(error.message);
     } catch (_) {
       if (mounted && requestId == _requestId) {
-        _showMessage('Could not refresh this Paw Snap. Please try again.');
+        _showMessage('Could not refresh this Gema Snap. Please try again.');
       }
     } finally {
       if (mounted && requestId == _requestId) {
@@ -186,20 +188,13 @@ class _PawSnapViewState extends State<PawSnapView> {
     _onBriefChanged();
   }
 
-  Future<void> _copyCaption() async {
-    final production = _production;
-    if (production == null) return;
-    final caption = [
-      production.headline,
-      production.tagline,
-      production.callToAction,
-    ].where(_hasText).join('\n\n');
-    if (caption.isEmpty) {
-      _showMessage('The caption is still being prepared.');
-      return;
-    }
-    await Clipboard.setData(ClipboardData(text: caption));
-    if (mounted) _showMessage('Caption copied — ready to paste.');
+  _GenState _stateForProduction(ContentProduction production) {
+    final needsAttention =
+        production.status == ContentProductionStatus.failed ||
+        production.status == ContentProductionStatus.partial;
+    return needsAttention && !_hasText(production.posterUrl)
+        ? _GenState.failed
+        : _GenState.ready;
   }
 
   Future<void> _openAsset(String? asset, String label) async {
@@ -211,26 +206,12 @@ class _PawSnapViewState extends State<PawSnapView> {
     }
     try {
       final opened = await launchUrl(uri, mode: LaunchMode.platformDefault);
-      if (!opened && mounted) _showMessage('Could not open the $label on this device.');
+      if (!opened && mounted) {
+        _showMessage('Could not open the $label on this device.');
+      }
     } catch (_) {
       if (mounted) _showMessage('Could not open the $label on this device.');
     }
-  }
-
-  List<String> _suggestedTags() {
-    final rawProduct = _productName.text
-        .toLowerCase()
-        .replaceAll(RegExp('[^a-z0-9]+'), '');
-    final product = rawProduct.length > 18 ? rawProduct.substring(0, 18) : rawProduct;
-    final audience = _selectedAudience
-        .toLowerCase()
-        .replaceAll(RegExp('[^a-z0-9]+'), '');
-    return <String>{
-      '#pawboleh',
-      if (product.isNotEmpty) '#$product',
-      if (audience.isNotEmpty) '#$audience',
-      '#supportlocal',
-    }.toList(growable: false);
   }
 
   void _showMessage(String message) {
@@ -248,11 +229,6 @@ class _PawSnapViewState extends State<PawSnapView> {
   @override
   Widget build(BuildContext context) {
     final isLoading = _state == _GenState.loading;
-    final hasResult = _state == _GenState.ready &&
-        _production != null &&
-        !_production!.isInProgress;
-    final hasVideo = _hasText(_production?.videoUrl);
-
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
@@ -264,10 +240,10 @@ class _PawSnapViewState extends State<PawSnapView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Paw Snap', style: AppTextStyles.cardTitle),
+            Text('Gema Snap', style: AppTextStyles.cardTitle),
             const SizedBox(height: 4),
             Text(
-              'Snap your product. PawBoleh makes it campaign-ready.',
+              'Add a product photo and creative brief. Gema turns both into a poster and promo video.',
               style: AppTextStyles.cardSubtitle,
             ),
             const SizedBox(height: AppSpacing.md),
@@ -295,10 +271,6 @@ class _PawSnapViewState extends State<PawSnapView> {
             _GenerateButton(isLoading: isLoading, onGenerate: _generate),
             const SizedBox(height: AppSpacing.lg),
             _buildOutputZone(),
-            if (hasResult) ...[
-              const SizedBox(height: AppSpacing.lg),
-              _buildActions(hasVideo),
-            ],
             const SizedBox(height: 80),
           ],
         ),
@@ -314,7 +286,7 @@ class _PawSnapViewState extends State<PawSnapView> {
         return const _LoadingOutputState();
       case _GenState.failed:
         return _FailureOutputState(
-          message: _errorMessage ?? 'Something went wrong while making your campaign.',
+          message: _friendlyFailureMessage(_errorMessage),
           onRetry: _generate,
         );
       case _GenState.ready:
@@ -323,72 +295,12 @@ class _PawSnapViewState extends State<PawSnapView> {
         return _CampaignOutput(
           production: production,
           posterUrl: _api.resolveAssetUrl(production.posterUrl),
-          tags: _suggestedTags(),
           isRefreshing: _isRefreshing,
-          onCopyCaption: _copyCaption,
           onRefresh: _refreshCampaign,
-          onOpenPoster: () => _openAsset(production.posterUrl, 'marketing poster'),
+          onOpenPoster: () => _openAsset(production.posterUrl, 'poster'),
           onOpenVideo: () => _openAsset(production.videoUrl, 'promo video'),
         );
     }
-  }
-
-  Widget _buildActions(bool hasVideo) {
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          height: AppSpacing.minTouchTarget,
-          child: ElevatedButton.icon(
-            onPressed: _copyCaption,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.textPrimary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              elevation: 0,
-            ),
-            icon: const Icon(Icons.copy_all_rounded),
-            label: Text('Copy caption', style: AppTextStyles.buttonLabel),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        SizedBox(
-          width: double.infinity,
-          height: AppSpacing.minTouchTarget,
-          child: Opacity(
-            opacity: hasVideo ? 1 : 0.45,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: AppColors.orangeGradient,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: hasVideo
-                      ? () => _openAsset(_production?.videoUrl, 'promo video')
-                      : null,
-                  child: Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.play_circle_fill_rounded, color: Colors.white),
-                        const SizedBox(width: 8),
-                        Text(
-                          hasVideo ? 'Open promo video' : 'Promo video unavailable',
-                          style: AppTextStyles.buttonLabel,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }
 
@@ -410,18 +322,23 @@ class _CameraViewfinder extends StatelessWidget {
     final hasPhoto = photoBytes != null;
     return Semantics(
       label: hasPhoto
-          ? 'Selected product photo. Tap retake to choose another image.'
-          : 'Empty product photo viewfinder. Tap to choose an image.',
+          ? 'Selected product image reference. Tap retake to choose another image.'
+          : 'Product image reference selector. Tap to choose an image.',
       child: Container(
         height: 220,
         width: double.infinity,
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          color: hasPhoto ? AppColors.tealStart : Colors.white.withValues(alpha: 0.5),
+          color: hasPhoto
+              ? AppColors.tealStart
+              : Colors.white.withValues(alpha: 0.5),
           border: hasPhoto
               ? null
-              : Border.all(color: AppColors.textPrimary.withValues(alpha: 0.2), width: 1.5),
+              : Border.all(
+                  color: AppColors.textPrimary.withValues(alpha: 0.2),
+                  width: 1.5,
+                ),
         ),
         child: Stack(
           fit: StackFit.expand,
@@ -438,14 +355,20 @@ class _CameraViewfinder extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.add_a_photo_rounded,
+                        LucideIcons.camera300,
                         size: 44,
                         color: AppColors.textPrimary.withValues(alpha: 0.35),
                       ),
                       const SizedBox(height: AppSpacing.sm),
-                      Text('Tap to snap your product', style: AppTextStyles.cardSubtitle),
+                      Text(
+                        'Choose a product image',
+                        style: AppTextStyles.cardSubtitle,
+                      ),
                       const SizedBox(height: 2),
-                      Text('or choose an image', style: AppTextStyles.cardSubtitle),
+                      Text(
+                        'or choose an image',
+                        style: AppTextStyles.cardSubtitle,
+                      ),
                     ],
                   ),
                 ),
@@ -459,14 +382,19 @@ class _CameraViewfinder extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 9,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.42),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: Text(
-                          'Product photo ready',
-                          style: AppTextStyles.chipLabel.copyWith(color: Colors.white),
+                          'Image reference ready',
+                          style: AppTextStyles.chipLabel.copyWith(
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -477,7 +405,7 @@ class _CameraViewfinder extends StatelessWidget {
                       backgroundColor: Colors.white,
                       foregroundColor: AppColors.textPrimary,
                       elevation: 2,
-                      tooltip: 'Retake product photo',
+                      tooltip: 'Choose another product image',
                       child: const Icon(Icons.refresh_rounded),
                     ),
                   ],
@@ -518,8 +446,9 @@ class _BriefFields extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         _SnapTextField(
           controller: productDescription,
-          label: 'What makes it special?',
-          hint: 'Describe the material, style, price, or best use.',
+          label: 'Creative brief for the AI',
+          hint:
+              'Describe the style, setting, mood, and product details to show.',
           enabled: enabled,
           minLines: 3,
           maxLines: 4,
@@ -572,7 +501,10 @@ class _SnapTextField extends StatelessWidget {
         hintStyle: AppTextStyles.cardSubtitle,
         filled: true,
         fillColor: Colors.white.withValues(alpha: 0.6),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.6)),
@@ -615,7 +547,10 @@ class _AudienceDropdown extends StatelessWidget {
           child: DropdownButton<String>(
             value: selected,
             isExpanded: true,
-            icon: const Icon(Icons.expand_more_rounded, color: AppColors.textPrimary),
+            icon: const Icon(
+              LucideIcons.chevronDown300,
+              color: AppColors.textPrimary,
+            ),
             style: AppTextStyles.cardSubtitle.copyWith(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w700,
@@ -662,14 +597,23 @@ class _GenerateButton extends StatelessWidget {
                   ? const SizedBox(
                       height: 24,
                       width: 24,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.4),
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.4,
+                      ),
                     )
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.auto_awesome_rounded, color: Colors.white),
+                        const Icon(
+                          LucideIcons.sparkles300,
+                          color: Colors.white,
+                        ),
                         const SizedBox(width: 8),
-                        Text('Generate Paw Snap', style: AppTextStyles.buttonLabel),
+                        Text(
+                          'Generate poster & video',
+                          style: AppTextStyles.buttonLabel,
+                        ),
                       ],
                     ),
             ),
@@ -684,9 +628,7 @@ class _CampaignOutput extends StatelessWidget {
   const _CampaignOutput({
     required this.production,
     required this.posterUrl,
-    required this.tags,
     required this.isRefreshing,
-    required this.onCopyCaption,
     required this.onRefresh,
     required this.onOpenPoster,
     required this.onOpenVideo,
@@ -694,90 +636,28 @@ class _CampaignOutput extends StatelessWidget {
 
   final ContentProduction production;
   final String? posterUrl;
-  final List<String> tags;
   final bool isRefreshing;
-  final VoidCallback onCopyCaption;
   final VoidCallback onRefresh;
   final VoidCallback onOpenPoster;
   final VoidCallback onOpenVideo;
 
   @override
   Widget build(BuildContext context) {
-    final caption = [production.headline, production.tagline, production.callToAction]
-        .where(_hasText)
-        .join('\n\n');
+    final isPartialResult = _isPartialVisualProduction(production);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (production.isInProgress) ...[
-          _PendingOutputState(
-            isRefreshing: isRefreshing,
-            onRefresh: onRefresh,
-          ),
+          _PendingOutputState(isRefreshing: isRefreshing, onRefresh: onRefresh),
           const SizedBox(height: AppSpacing.sm),
         ],
-        if (_hasText(production.marketingConcept)) ...[
-          _OutputSection(
-            icon: Icons.auto_awesome_rounded,
-            gradient: AppColors.orangeGradient,
-            title: 'Campaign idea',
-            body: production.marketingConcept!,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-        ],
-        if (caption.isNotEmpty) ...[
-          _OutputSection(
-            icon: Icons.chat_bubble_rounded,
-            gradient: AppColors.tealGradient,
-            title: 'Caption ready to post',
-            body: caption,
-            onCopy: onCopyCaption,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-        ],
-        if (_hasText(production.targetAudience)) ...[
-          _OutputSection(
-            icon: Icons.people_alt_rounded,
-            gradient: AppColors.tealGradient,
-            title: 'AI audience',
-            body: production.targetAudience!,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-        ],
-        GlassCard(
-          borderRadius: 20,
-          padding: const EdgeInsets.all(16),
-          semanticLabel: 'Suggested tags',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Suggested tags', style: AppTextStyles.sectionLabel),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: tags
-                    .map(
-                      (tag) => Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppColors.tealStart.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Text(
-                          tag,
-                          style: AppTextStyles.chipLabel.copyWith(color: AppColors.tealStart),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ],
-          ),
-        ),
         if (posterUrl != null) ...[
           const SizedBox(height: AppSpacing.sm),
           _PosterCard(posterUrl: posterUrl!, onOpen: onOpenPoster),
+        ],
+        if (isPartialResult) ...[
+          const SizedBox(height: AppSpacing.sm),
+          const _VideoUnavailableNotice(),
         ],
         if (_hasText(production.videoUrl)) ...[
           const SizedBox(height: AppSpacing.sm),
@@ -788,54 +668,35 @@ class _CampaignOutput extends StatelessWidget {
   }
 }
 
-class _OutputSection extends StatelessWidget {
-  const _OutputSection({
-    required this.icon,
-    required this.gradient,
-    required this.title,
-    required this.body,
-    this.onCopy,
-  });
-
-  final IconData icon;
-  final Gradient gradient;
-  final String title;
-  final String body;
-  final VoidCallback? onCopy;
+class _VideoUnavailableNotice extends StatelessWidget {
+  const _VideoUnavailableNotice();
 
   @override
   Widget build(BuildContext context) {
     return GlassCard(
       borderRadius: 20,
-      padding: const EdgeInsets.all(16),
-      semanticLabel: '$title output',
-      child: Column(
+      semanticLabel: 'Promo video unavailable',
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(shape: BoxShape.circle, gradient: gradient),
-                child: Icon(icon, color: Colors.white, size: 15),
-              ),
-              const SizedBox(width: 10),
-              Expanded(child: Text(title, style: AppTextStyles.sectionLabel)),
-              if (onCopy != null)
-                IconButton(
-                  tooltip: 'Copy $title',
-                  onPressed: onCopy,
-                  icon: Icon(
-                    Icons.copy_rounded,
-                    size: 18,
-                    color: AppColors.textPrimary.withValues(alpha: 0.55),
-                  ),
+          const Icon(Icons.shield_outlined, color: AppColors.tealStart),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Poster ready - video unavailable',
+                  style: AppTextStyles.sectionLabel,
                 ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  'The promo video could not be generated. Change your photo or creative brief, then generate again.',
+                  style: AppTextStyles.cardSubtitle.copyWith(height: 1.4),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
-          SelectableText(body, style: AppTextStyles.cardSubtitle.copyWith(height: 1.45)),
         ],
       ),
     );
@@ -853,7 +714,7 @@ class _PosterCard extends StatelessWidget {
     return GlassCard(
       borderRadius: 20,
       padding: EdgeInsets.zero,
-      semanticLabel: 'Generated marketing poster',
+      semanticLabel: 'Generated AI poster',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -868,11 +729,13 @@ class _PosterCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
             child: Row(
               children: [
-                const Icon(Icons.image_outlined, color: AppColors.tealStart),
+                const Icon(LucideIcons.image300, color: AppColors.tealStart),
                 const SizedBox(width: 8),
-                Expanded(child: Text('Marketing poster', style: AppTextStyles.sectionLabel)),
+                Expanded(
+                  child: Text('AI poster', style: AppTextStyles.sectionLabel),
+                ),
                 IconButton(
-                  tooltip: 'Open marketing poster',
+                  tooltip: 'Open poster',
                   onPressed: onOpen,
                   icon: const Icon(Icons.open_in_new_rounded),
                 ),
@@ -902,7 +765,10 @@ class _VideoCard extends StatelessWidget {
           Container(
             height: 42,
             width: 42,
-            decoration: const BoxDecoration(shape: BoxShape.circle, gradient: AppColors.orangeGradient),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: AppColors.orangeGradient,
+            ),
             child: const Icon(Icons.play_arrow_rounded, color: Colors.white),
           ),
           const SizedBox(width: 12),
@@ -912,7 +778,10 @@ class _VideoCard extends StatelessWidget {
               children: [
                 Text('Promo video', style: AppTextStyles.sectionLabel),
                 const SizedBox(height: 3),
-                Text('Open the generated video in your browser.', style: AppTextStyles.cardSubtitle),
+                Text(
+                  'Open the generated video in your browser.',
+                  style: AppTextStyles.cardSubtitle,
+                ),
               ],
             ),
           ),
@@ -933,16 +802,22 @@ class _EmptyOutputState extends StatelessWidget {
       semanticLabel: 'Campaign preview',
       child: Column(
         children: [
-          Icon(Icons.auto_awesome_rounded, size: 32, color: AppColors.textPrimary.withValues(alpha: 0.4)),
+          Icon(
+            LucideIcons.sparkles300,
+            size: 32,
+            color: AppColors.textPrimary.withValues(alpha: 0.4),
+          ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Your campaign will appear here',
-            style: AppTextStyles.cardSubtitle.copyWith(fontWeight: FontWeight.w700),
+            'Your poster and video will appear here',
+            style: AppTextStyles.cardSubtitle.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
           Text(
-            'Add your product details above, then generate your Paw Snap.',
+            'Add a product image and creative brief, then generate your visuals.',
             style: AppTextStyles.cardSubtitle,
             textAlign: TextAlign.center,
           ),
@@ -962,7 +837,7 @@ class _FailureOutputState extends StatelessWidget {
   Widget build(BuildContext context) {
     return GlassCard(
       borderRadius: 20,
-      semanticLabel: 'Campaign generation error',
+      semanticLabel: 'Visual generation error',
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -972,13 +847,21 @@ class _FailureOutputState extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Couldn’t make this Paw Snap', style: AppTextStyles.sectionLabel),
+                Text(
+                  'Couldn’t generate your visuals',
+                  style: AppTextStyles.sectionLabel,
+                ),
                 const SizedBox(height: 4),
-                Text(message, style: AppTextStyles.cardSubtitle.copyWith(height: 1.4)),
+                Text(
+                  message,
+                  style: AppTextStyles.cardSubtitle.copyWith(height: 1.4),
+                ),
                 const SizedBox(height: 10),
                 TextButton.icon(
                   onPressed: onRetry,
-                  style: TextButton.styleFrom(foregroundColor: AppColors.tealStart),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.tealStart,
+                  ),
                   icon: const Icon(Icons.refresh_rounded),
                   label: const Text('Try again'),
                 ),
@@ -1004,7 +887,7 @@ class _PendingOutputState extends StatelessWidget {
   Widget build(BuildContext context) {
     return GlassCard(
       borderRadius: 20,
-      semanticLabel: 'Campaign generation in progress',
+      semanticLabel: 'Visual generation in progress',
       child: Row(
         children: [
           const Icon(Icons.hourglass_top_rounded, color: AppColors.tealStart),
@@ -1013,10 +896,13 @@ class _PendingOutputState extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Your Paw Snap is still generating', style: AppTextStyles.sectionLabel),
+                Text(
+                  'Your poster and video are still generating',
+                  style: AppTextStyles.sectionLabel,
+                ),
                 const SizedBox(height: 4),
                 Text(
-                  'Refresh in a moment to see the completed campaign.',
+                  'Refresh in a moment to see the completed visuals.',
                   style: AppTextStyles.cardSubtitle,
                 ),
               ],
@@ -1068,7 +954,7 @@ class _LoadingOutputStateState extends State<_LoadingOutputState>
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Generating campaign, please wait',
+      label: 'Generating poster and promo video, please wait',
       liveRegion: true,
       child: AnimatedBuilder(
         animation: _controller,
@@ -1082,7 +968,9 @@ class _LoadingOutputStateState extends State<_LoadingOutputState>
                   height: 64,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: AppColors.textPrimary.withValues(alpha: opacity * 0.15),
+                    color: AppColors.textPrimary.withValues(
+                      alpha: opacity * 0.15,
+                    ),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: index == 1
@@ -1092,7 +980,9 @@ class _LoadingOutputStateState extends State<_LoadingOutputState>
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.2,
-                              color: AppColors.textPrimary.withValues(alpha: 0.5),
+                              color: AppColors.textPrimary.withValues(
+                                alpha: 0.5,
+                              ),
                             ),
                           ),
                         )
@@ -1108,3 +998,34 @@ class _LoadingOutputStateState extends State<_LoadingOutputState>
 }
 
 bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
+
+bool _isPartialVisualProduction(ContentProduction production) {
+  final videoMissing = !_hasText(production.videoUrl);
+  final hasPoster = _hasText(production.posterUrl);
+  return hasPoster &&
+      videoMissing &&
+      (production.status == ContentProductionStatus.partial ||
+          production.status == ContentProductionStatus.failed);
+}
+
+String _friendlyFailureMessage(String? message) {
+  const fallback =
+      'We couldn\'t generate your visuals. Try a different photo or creative brief.';
+  final value = message?.trim();
+  if (value == null || value.isEmpty || _hasRawProviderDetails(value)) {
+    return fallback;
+  }
+  return value;
+}
+
+bool _hasRawProviderDetails(String value) {
+  final normalized = value.toLowerCase();
+  return normalized.contains('openai') ||
+      normalized.contains('video_') ||
+      normalized.contains('image_') ||
+      normalized.contains('moderation') ||
+      normalized.contains('provider') ||
+      normalized.contains('api error') ||
+      normalized.contains('status \'failed\'') ||
+      RegExp(r'\b(?:video|image|resp|job)_[a-z0-9_-]+').hasMatch(normalized);
+}
