@@ -309,7 +309,7 @@ class _PawSnapViewState extends State<PawSnapView> {
   Widget _buildOutputZone() {
     switch (_state) {
       case _GenState.empty:
-        return _EmptyOutputState(onPickPhoto: _pickPhoto);
+        return const _EmptyOutputState();
       case _GenState.loading:
         return const _LoadingOutputState();
       case _GenState.failed:
@@ -319,7 +319,7 @@ class _PawSnapViewState extends State<PawSnapView> {
         );
       case _GenState.ready:
         final production = _production;
-        if (production == null) return _EmptyOutputState(onPickPhoto: _pickPhoto);
+        if (production == null) return const _EmptyOutputState();
         return _CampaignOutput(
           production: production,
           posterUrl: _api.resolveAssetUrl(production.posterUrl),
@@ -924,28 +924,25 @@ class _VideoCard extends StatelessWidget {
 }
 
 class _EmptyOutputState extends StatelessWidget {
-  const _EmptyOutputState({required this.onPickPhoto});
-
-  final VoidCallback onPickPhoto;
+  const _EmptyOutputState();
 
   @override
   Widget build(BuildContext context) {
     return GlassCard(
       borderRadius: 20,
-      semanticLabel: 'No campaign generated yet',
-      onTap: onPickPhoto,
+      semanticLabel: 'Campaign preview',
       child: Column(
         children: [
           Icon(Icons.auto_awesome_rounded, size: 32, color: AppColors.textPrimary.withValues(alpha: 0.4)),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Snap a product to create your campaign',
+            'Your campaign will appear here',
             style: AppTextStyles.cardSubtitle.copyWith(fontWeight: FontWeight.w700),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
           Text(
-            'You’ll get campaign copy, a poster, and a promo video when available.',
+            'Add your product details above, then generate your Paw Snap.',
             style: AppTextStyles.cardSubtitle,
             textAlign: TextAlign.center,
           ),
