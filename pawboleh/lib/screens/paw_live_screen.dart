@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 
 class _ChatMessage {
-  const _ChatMessage(this.username, this.message, this.color);
+  const _ChatMessage({
+    required this.id,
+    required this.username,
+    required this.message,
+    required this.color,
+    this.isAi = false,
+  });
+
+  final String id;
   final String username;
   final String message;
   final Color color;
+  final bool isAi;
 }
 
-/// Gema Live tab content — a livestream control surface with viewer chat,
-/// admin quick-reply chips, and a message composer. Rendered as a tab
-/// body inside MainShell (no own Scaffold; the shell paints black behind
-/// the live tab).
+/// Paw Live Screen (AI Livestreamer)
+/// Features dynamic Product Context controllers (Name, Fabric, Fit, Price, Colors)
+/// and real-time chat powered by OpenAI GPT-4o-mini & Express backend.
 class PawLiveView extends StatefulWidget {
   const PawLiveView({super.key, required this.onExit});
 
@@ -22,36 +31,30 @@ class PawLiveView extends StatefulWidget {
   State<PawLiveView> createState() => _PawLiveViewState();
 }
 
-class _PawLiveViewState extends State<PawLiveView>
-    with SingleTickerProviderStateMixin {
+class _PawLiveViewState extends State<PawLiveView> with SingleTickerProviderStateMixin {
   final ScrollController _chatScrollController = ScrollController();
-  final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _questionController = TextEditingController();
+
+  // Dynamic Product Context Controllers
+  final TextEditingController _nameController = TextEditingController(text: 'Handcrafted Leather Wallet');
+  final TextEditingController _fabricController = TextEditingController(text: 'Full-Grain Genuine Leather');
+  final TextEditingController _fitController = TextEditingController(text: 'Compact Ergonomic Bifold');
+  final TextEditingController _priceController = TextEditingController(text: '\$40');
+  final TextEditingController _colorsController = TextEditingController(text: 'Vintage Tan & Onyx Black');
+
   late final AnimationController _pulseController;
+  bool _obsCaptureMode = false;
+  bool _isAiResponding = false;
+  final String _streamStatus = 'LIVE · OpenAI Stream Host';
 
-  final List<_ChatMessage> _chatMessages = const [
-    _ChatMessage('deniyanti', 'Boleh DM saya harga tak?', Color(0xFF60A5FA)),
-    _ChatMessage('camry', 'How now, size L available?', Color(0xFFF472B6)),
-    _ChatMessage(
-      'siti_amira',
-      'Is this available in size M?',
-      Color(0xFFFBBF24),
+  final List<_ChatMessage> _chatMessages = [
+    const _ChatMessage(
+      id: 'welcome',
+      username: 'Gema AI Host',
+      message: 'Welcome to today’s livestream! Ask me anything about our handcrafted collection.',
+      color: Color(0xFFF59E0B),
+      isAi: true,
     ),
-    _ChatMessage(
-      'aina.boutique',
-      'Does it come with the shawl?',
-      Color(0xFF34D399),
-    ),
-    _ChatMessage('zul.hakim', 'Price for bundle of 2?', Color(0xFF60A5FA)),
-    _ChatMessage('mira_wardrobe', 'Fast ship to Penang?', Color(0xFFF472B6)),
-  ];
-
-  final List<String> _quickReplies = const [
-    'Ready stock',
-    'Bundle promo',
-    'Size chart',
-    'Fabric detail',
-    'Discount code',
-    'Admin',
   ];
 
   @override
@@ -66,406 +69,410 @@ class _PawLiveViewState extends State<PawLiveView>
   @override
   void dispose() {
     _chatScrollController.dispose();
-    _messageController.dispose();
+    _questionController.dispose();
+    _nameController.dispose();
+    _fabricController.dispose();
+    _fitController.dispose();
+    _priceController.dispose();
+    _colorsController.dispose();
     _pulseController.dispose();
     super.dispose();
   }
 
-  void _handleQuickReply(String label) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('AI host cued: "$label"'),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.textPrimary,
-      ),
-    );
+  Map<String, dynamic> _buildProductContext() {
+    return {
+      'name': _nameController.text.trim(),
+      'fabric': _fabricController.text.trim(),
+      'fit': _fitController.text.trim(),
+      'price': _priceController.text.trim(),
+      'colors': _colorsController.text.trim(),
+      'stock': 5,
+    };
   }
 
-  void _sendMessage() {
-    final text = _messageController.text.trim();
-    if (text.isEmpty) return;
-    // Demo data is static; wire this to a real chat/message store in production.
-    _messageController.clear();
-    FocusScope.of(context).unfocus();
+  Future<void> _sendCustomerQuestion(String questionText) async {
+    final text = questionText.trim();
+    if (text.isEmpty || _isAiResponding) return;
+
+    // 1. Add User Question to Chat Feed
+    setState(() {
+      _chatMessages.add(_ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        username: 'You (Customer)',
+        message: text,
+        color: const Color(0xFF38BDF8),
+      ));
+      _isAiResponding = true;
+      _questionController.clear();
+    });
+
+    _scrollToBottom();
+
+    // 2. Trigger OpenAI API via ApiService
+    try {
+      final response = await ApiService.sendPawLiveChat(
+        productContext: _buildProductContext(),
+        customerQuestion: text,
+      );
+
+      if (!mounted) return;
+
+      final aiReply = response['reply'] as String? ?? 'Thank you for asking!';
+
+      // 3. Add AI Response to Chat Feed
+      setState(() {
+        _chatMessages.add(_ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          username: 'Gema AI Host',
+          message: aiReply,
+          color: const Color(0xFFF59E0B),
+          isAi: true,
+        ));
+        _isAiResponding = false;
+      });
+
+      _scrollToBottom();
+    } catch (e) {
+      debugPrint('Paw Live Connection Error: $e');
+
+      if (!mounted) return;
+
+      setState(() => _isAiResponding = false);
+
+      // Display SnackBar alert in UI
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Paw Live Network Error: $e'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_chatScrollController.hasClients) {
+        _chatScrollController.animateTo(
+          _chatScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        const _LiveVideoPlaceholder(),
+    return Container(
+      color: Colors.black,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Stream Canvas
+          const _ObsStreamVideoCanvas(),
 
-        // Scrim for legibility of overlays
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppColors.deepOlive.withValues(alpha: 0.12),
-                Colors.transparent,
-                AppColors.deepOlive.withValues(alpha: 0.18),
-              ],
-              stops: const [0.0, 0.35, 1.0],
-            ),
-          ),
-        ),
-
-        // TikTok-style host header: creator context stays on the left while
-        // the live state and audience count are anchored at the top-right.
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: 10,
-              ),
-              child: Row(
-                children: [
-                  _RoundLiveControl(
-                    icon: LucideIcons.arrowLeft300,
-                    label: 'Exit Gema Live',
-                    onTap: widget.onExit,
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: const BoxDecoration(
-                      color: AppColors.tealStart,
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      'KA',
-                      style: AppTextStyles.chipLabel.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Kirana Atelier',
-                          style: AppTextStyles.chatUsername,
-                        ),
-                        Text(
-                          'AI host · Raya Collection',
-                          style: AppTextStyles.chipLabel.copyWith(
-                            color: AppColors.textPrimary.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  AnimatedBuilder(
-                    animation: _pulseController,
-                    builder: (context, child) {
-                      final glow = 5 + (_pulseController.value * 8);
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 7,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.deepOlive,
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.gold.withValues(alpha: 0.42),
-                              blurRadius: glow,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              LucideIcons.eye300,
-                              color: Colors.white,
-                              size: 14,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'LIVE 1.2K',
-                              style: AppTextStyles.chipLabel.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+          // Gradient Overlay
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withValues(alpha: 0.55),
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.85),
                 ],
+                stops: const [0.0, 0.4, 1.0],
               ),
             ),
           ),
-        ),
 
-        // Scrolling viewer chat feed, lower half of the screen
-        Positioned(
-          left: AppSpacing.sm,
-          right: 52,
-          bottom: 214,
-          top: MediaQuery.of(context).size.height * 0.46,
-          child: _ChatFeed(
-            controller: _chatScrollController,
-            messages: _chatMessages,
-          ),
-        ),
-
-        // Pinned bottom panel: admin quick-reply chips + message composer
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: SafeArea(
-            top: false,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.md,
-                12,
-                AppSpacing.md,
-                AppSpacing.md,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.confettiPink.withValues(alpha: 0.94),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Admin quick-reply',
-                    style: AppTextStyles.chipLabel.copyWith(
-                      color: AppColors.textPrimary.withValues(alpha: 0.7),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _quickReplies.asMap().entries.map((entry) {
-                      final isFirst = entry.key == 0;
-                      final label = entry.value;
-                      return ActionChip(
-                        label: Text(
-                          label,
-                          style: AppTextStyles.chipLabel.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        backgroundColor: isFirst
-                            ? AppColors.gold
-                            : Colors.white.withValues(alpha: 0.64),
-                        side: BorderSide.none,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 10,
-                        ),
-                        onPressed: () => _handleQuickReply(label),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    height: 46,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.66),
-                      borderRadius: BorderRadius.circular(23),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _messageController,
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 13,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: 'Send a message...',
-                              hintStyle: TextStyle(
-                                color: AppColors.textPrimary.withValues(
-                                  alpha: 0.5,
-                                ),
-                                fontSize: 13,
-                              ),
-                              border: InputBorder.none,
-                              isDense: true,
-                            ),
-                            onSubmitted: (_) => _sendMessage(),
-                          ),
-                        ),
-                        Semantics(
-                          button: true,
-                          label: 'Send voice cue',
-                          child: InkWell(
-                            onTap: _sendMessage,
-                            child: const Padding(
-                              padding: EdgeInsets.all(4),
-                              child: Icon(
-                                LucideIcons.mic300,
-                                color: AppColors.textPrimary,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _RoundLiveControl extends StatelessWidget {
-  const _RoundLiveControl({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.72),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: AppColors.textPrimary, size: 20),
-        ),
-      ),
-    );
-  }
-}
-
-/// Placeholder for the AI avatar livestream video feed.
-class _LiveVideoPlaceholder extends StatelessWidget {
-  const _LiveVideoPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: 'Live video feed of AI digital avatar in a fashion boutique',
-      image: true,
-      child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppColors.confettiPink, Color(0xFFFFF6E8)],
-          ),
-        ),
-        child: Center(
-          child: Icon(
-            LucideIcons.user300,
-            color: AppColors.deepOlive.withValues(alpha: 0.16),
-            size: 160,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ChatFeed extends StatelessWidget {
-  const _ChatFeed({required this.controller, required this.messages});
-
-  final ScrollController controller;
-  final List<_ChatMessage> messages;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: 'Viewer chat feed',
-      child: ShaderMask(
-        shaderCallback: (rect) {
-          return const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.transparent, Colors.black, Colors.black],
-            stops: [0.0, 0.15, 1.0],
-          ).createShader(rect);
-        },
-        blendMode: BlendMode.dstIn,
-        child: ListView.builder(
-          controller: controller,
-          reverse: true,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          itemCount: messages.length,
-          itemBuilder: (context, index) {
-            final msg = messages[messages.length - 1 - index];
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.58),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: RichText(
-                  text: TextSpan(
+          // Main Layout
+          Column(
+            children: [
+              // Header
+              SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
                     children: [
-                      TextSpan(
-                        text: '${msg.username}  ',
-                        style: AppTextStyles.chatUsername.copyWith(
-                          color: msg.color,
+                      if (!_obsCaptureMode)
+                        InkWell(
+                          onTap: widget.onExit,
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(
+                              color: Colors.white24,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(LucideIcons.arrowLeft300, color: Colors.white, size: 20),
+                          ),
                         ),
+                      if (!_obsCaptureMode) const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 10,
+                                height: 10,
+                                decoration: const BoxDecoration(
+                                  color: Colors.redAccent,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                _streamStatus,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (!_obsCaptureMode)
+                            const Text(
+                              'OpenAI gpt-4o-mini Stream Host',
+                              style: TextStyle(color: Colors.white60, fontSize: 11),
+                            ),
+                        ],
                       ),
-                      TextSpan(
-                        text: msg.message,
-                        style: AppTextStyles.chatMessage,
+                      const Spacer(),
+                      ElevatedButton.icon(
+                        onPressed: () => setState(() => _obsCaptureMode = !_obsCaptureMode),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _obsCaptureMode ? Colors.redAccent : Colors.white24,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
+                        icon: Icon(
+                          _obsCaptureMode ? LucideIcons.eyeOff300 : LucideIcons.video300,
+                          size: 16,
+                        ),
+                        label: Text(
+                          _obsCaptureMode ? 'Exit OBS Mode' : 'OBS Clean Mode',
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-            );
-          },
+
+              // Dynamic Product Context Controllers Panel
+              if (!_obsCaptureMode)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.white24),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(LucideIcons.sliders300, color: AppColors.gold, size: 16),
+                            SizedBox(width: 6),
+                            Text(
+                              'Product AI Context (Editable for OpenAI)',
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(child: _buildContextInput('Name', _nameController)),
+                            const SizedBox(width: 6),
+                            Expanded(child: _buildContextInput('Fabric', _fabricController)),
+                            const SizedBox(width: 6),
+                            Expanded(child: _buildContextInput('Fit', _fitController)),
+                            const SizedBox(width: 6),
+                            Expanded(child: _buildContextInput('Price', _priceController)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              const Spacer(),
+
+              // Live Scrollable Chat Feed
+              Container(
+                height: _obsCaptureMode ? 340 : 220,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ListView.builder(
+                  controller: _chatScrollController,
+                  itemCount: _chatMessages.length,
+                  itemBuilder: (context, index) {
+                    final msg = _chatMessages[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: msg.isAi ? Colors.amber.withValues(alpha: 0.25) : Colors.black54,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: msg.isAi ? Colors.amberAccent : Colors.white12,
+                              width: 1,
+                            ),
+                          ),
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: '${msg.username}: ',
+                                  style: TextStyle(
+                                    color: msg.color,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: msg.message,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              // Custom Question Input Field & Submit Button
+              if (!_obsCaptureMode)
+                SafeArea(
+                  top: false,
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    color: Colors.black45,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _questionController,
+                            style: const TextStyle(color: Colors.white, fontSize: 13),
+                            decoration: InputDecoration(
+                              hintText: 'Ask host about fabric, fit, price, or custom question...',
+                              hintStyle: const TextStyle(color: Colors.white38, fontSize: 12),
+                              filled: true,
+                              fillColor: Colors.white12,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(24),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                            onSubmitted: _sendCustomerQuestion,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton.filled(
+                          onPressed: () => _sendCustomerQuestion(_questionController.text),
+                          icon: _isAiResponding
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                                )
+                              : const Icon(LucideIcons.send300, size: 18),
+                          style: IconButton.styleFrom(backgroundColor: AppColors.gold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContextInput(String label, TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      style: const TextStyle(color: Colors.white, fontSize: 11),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: AppColors.gold, fontSize: 10),
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        filled: true,
+        fillColor: Colors.black38,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.white24),
+        ),
+      ),
+    );
+  }
+}
+
+class _ObsStreamVideoCanvas extends StatelessWidget {
+  const _ObsStreamVideoCanvas();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1E1B4B), Color(0xFF31103F), Color(0xFF0F172A)],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.amber.withValues(alpha: 0.15),
+                border: Border.all(color: Colors.amber, width: 2),
+              ),
+              child: const Icon(LucideIcons.user300, color: Colors.amber, size: 96),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'OPENAI GPT-4o-mini LIVESTREAM HOST',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.5,
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Ready for OBS Capture · Dynamic Product Context Enabled',
+              style: TextStyle(color: Colors.white54, fontSize: 12),
+            ),
+          ],
         ),
       ),
     );

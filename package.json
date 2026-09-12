@@ -1,0 +1,17 @@
+{
+  "name": "adlp-ai-live-commerce",
+  "version": "1.0.0",
+  "description": "AI Live Commerce API and Frontend preview",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "adlp-ai-live-commerce": "file:",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "openai": "^7.15.0"
+  }
+}

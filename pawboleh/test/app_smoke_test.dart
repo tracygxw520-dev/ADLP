@@ -23,8 +23,10 @@ void main() {
 
     await tester.tap(find.text('Gema Live').first);
     await tester.pump();
-    expect(find.text('Admin quick-reply'), findsOneWidget);
-    expect(find.text('LIVE 1.2K'), findsOneWidget);
+    expect(
+      find.text('Product AI Context (Editable for OpenAI)'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Gema Snap renders from the dashboard', (tester) async {
