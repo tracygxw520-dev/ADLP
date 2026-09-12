@@ -29,7 +29,7 @@ class _MainShellState extends State<MainShell> {
     final isLiveTab = _index == 1;
 
     return Scaffold(
-      extendBody: true,
+      extendBody: !isLiveTab,
       body: Container(
         decoration: BoxDecoration(
           gradient: isLiveTab ? null : AppColors.backgroundGradient,
@@ -51,12 +51,14 @@ class _MainShellState extends State<MainShell> {
                 ),
               ),
             ),
-            const PawLiveView(),
+            PawLiveView(onExit: () => _goToTab(0)),
             const PawSnapView(),
           ],
         ),
       ),
-      bottomNavigationBar: _PawBottomNav(currentIndex: _index, onTap: _goToTab, isDark: isLiveTab),
+      bottomNavigationBar: isLiveTab
+          ? null
+          : _PawBottomNav(currentIndex: _index, onTap: _goToTab, isDark: isLiveTab),
     );
   }
 }

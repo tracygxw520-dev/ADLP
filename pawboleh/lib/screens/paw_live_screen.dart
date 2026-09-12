@@ -13,7 +13,9 @@ class _ChatMessage {
 /// body inside MainShell (no own Scaffold; the shell paints black behind
 /// the live tab).
 class PawLiveView extends StatefulWidget {
-  const PawLiveView({super.key});
+  const PawLiveView({super.key, required this.onExit});
+
+  final VoidCallback onExit;
 
   @override
   State<PawLiveView> createState() => _PawLiveViewState();
@@ -101,72 +103,79 @@ class _PawLiveViewState extends State<PawLiveView>
           ),
         ),
 
-        // Top bar: title + LIVE badge + viewer count
-        SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 8),
+        // TikTok-style host header: creator context stays on the left while
+        // the live state and audience count are anchored at the top-right.
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: SafeArea(
+            bottom: false,
+            child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
             child: Row(
               children: [
-                Text(
-                  'Paw Live',
-                  style: AppTextStyles.cardTitle.copyWith(color: Colors.white, fontSize: 17),
+                _RoundLiveControl(
+                  icon: Icons.arrow_back_rounded,
+                  label: 'Exit Paw Live',
+                  onTap: widget.onExit,
                 ),
                 const SizedBox(width: AppSpacing.sm),
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: const BoxDecoration(
+                    color: AppColors.tealStart,
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text('KA', style: AppTextStyles.chipLabel.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Kirana Atelier', style: AppTextStyles.chatUsername),
+                      Text('AI host · Raya Collection', style: AppTextStyles.chipLabel.copyWith(color: Colors.white70)),
+                    ],
+                  ),
+                ),
                 AnimatedBuilder(
                   animation: _pulseController,
                   builder: (context, child) {
-                    final glow = 6 + (_pulseController.value * 10);
+                    final glow = 5 + (_pulseController.value * 8);
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                       decoration: BoxDecoration(
                         color: AppColors.liveRed,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.liveRed.withValues(alpha: 0.6),
-                            blurRadius: glow,
-                            spreadRadius: 1,
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [BoxShadow(color: AppColors.liveRed.withValues(alpha: 0.55), blurRadius: glow)],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            width: 7,
-                            height: 7,
-                            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'LIVE',
-                            style: AppTextStyles.chipLabel.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
+                          const Icon(Icons.remove_red_eye_rounded, color: Colors.white, size: 14),
+                          const SizedBox(width: 4),
+                          Text('LIVE 1.2K', style: AppTextStyles.chipLabel.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
                         ],
                       ),
                     );
                   },
                 ),
-                const Spacer(),
-                const Icon(Icons.remove_red_eye_rounded, color: Colors.white70, size: 16),
-                const SizedBox(width: 4),
-                Text('1.2K', style: AppTextStyles.chatMessage.copyWith(fontWeight: FontWeight.w700)),
               ],
+            ),
             ),
           ),
         ),
 
         // Scrolling viewer chat feed, lower half of the screen
         Positioned(
-          left: 0,
-          right: 90,
-          bottom: 220,
-          top: MediaQuery.of(context).size.height * 0.42,
+          left: AppSpacing.sm,
+          right: 52,
+          bottom: 214,
+          top: MediaQuery.of(context).size.height * 0.46,
           child: _ChatFeed(controller: _chatScrollController, messages: _chatMessages),
         ),
 
@@ -180,11 +189,12 @@ class _PawLiveViewState extends State<PawLiveView>
             child: Container(
               padding: const EdgeInsets.fromLTRB(AppSpacing.md, 12, AppSpacing.md, AppSpacing.md),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.55),
+                color: Colors.black.withValues(alpha: 0.7),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(24),
                   topRight: Radius.circular(24),
                 ),
+                border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.12))),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -260,6 +270,32 @@ class _PawLiveViewState extends State<PawLiveView>
           ),
         ),
       ],
+    );
+  }
+}
+
+class _RoundLiveControl extends StatelessWidget {
+  const _RoundLiveControl({required this.icon, required this.label, required this.onTap});
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.36), shape: BoxShape.circle),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+      ),
     );
   }
 }

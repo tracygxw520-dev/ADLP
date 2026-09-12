@@ -15,16 +15,21 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
   }
 
-  testWidgets('all three main tabs render and can be selected', (tester) async {
+  testWidgets('Paw Live renders from the dashboard', (tester) async {
     await tester.pumpWidget(const PawBolehApp());
     await signIn(tester);
     expect(find.text('Good morning, Sis!'), findsOneWidget);
 
-    await tester.tap(find.text('Paw Live').last);
+    await tester.tap(find.text('Paw Live').first);
     await tester.pump();
     expect(find.text('Admin quick-reply'), findsOneWidget);
+    expect(find.text('LIVE 1.2K'), findsOneWidget);
+  });
 
-    await tester.tap(find.text('Paw Snap').last);
+  testWidgets('Paw Snap renders from the dashboard', (tester) async {
+    await tester.pumpWidget(const PawBolehApp());
+    await signIn(tester);
+    await tester.tap(find.text('Paw Snap').first);
     await tester.pump();
     expect(find.text('Target audience: Gen Z'), findsOneWidget);
   });
