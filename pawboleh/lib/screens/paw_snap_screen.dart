@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
 
 enum _GenState { empty, loading, ready }
 
-/// Paw Snap tab content — content generator with empty, loading, and ready
+/// Gema Snap tab content — content generator with empty, loading, and ready
 /// states, producing a video script, a WhatsApp promo message, and tags.
 class PawSnapView extends StatefulWidget {
   const PawSnapView({super.key});
@@ -30,7 +31,12 @@ class _PawSnapViewState extends State<PawSnapView> {
   static const String _whatsappPromo =
       'Restock alert for our best-selling piece! Ready to ship within 2 '
       'business days — reply "YES" to reserve yours.';
-  static const List<String> _tags = ['#pawboleh', '#kiranaatelier', '#ootdraya', '#fashionmsme'];
+  static const List<String> _tags = [
+    '#pawboleh',
+    '#kiranaatelier',
+    '#ootdraya',
+    '#fashionmsme',
+  ];
 
   Future<void> _capturePhoto() async {
     setState(() => _state = _GenState.loading);
@@ -45,7 +51,12 @@ class _PawSnapViewState extends State<PawSnapView> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xl),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.md,
+          AppSpacing.lg,
+          AppSpacing.xl,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -54,20 +65,28 @@ class _PawSnapViewState extends State<PawSnapView> {
                 Semantics(
                   button: true,
                   label: 'Back',
-                  child: const Icon(Icons.chevron_left_rounded, color: AppColors.textPrimary),
+                  child: const Icon(
+                    LucideIcons.arrowLeft300,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 const SizedBox(width: 4),
-                Text('Paw Snap', style: AppTextStyles.cardTitle),
+                Text('Gema Snap', style: AppTextStyles.cardTitle),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
 
-            _CameraViewfinder(state: _state, onCapture: _capturePhoto, onRetake: _retake),
+            _CameraViewfinder(
+              state: _state,
+              onCapture: _capturePhoto,
+              onRetake: _retake,
+            ),
             const SizedBox(height: AppSpacing.md),
             _AudienceDropdown(
               selected: _selectedAudience,
               options: _audiences,
-              onChanged: (v) => setState(() => _selectedAudience = v ?? _selectedAudience),
+              onChanged: (v) =>
+                  setState(() => _selectedAudience = v ?? _selectedAudience),
             ),
             const SizedBox(height: AppSpacing.lg),
 
@@ -92,21 +111,21 @@ class _PawSnapViewState extends State<PawSnapView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _OutputSection(
-              icon: Icons.movie_creation_rounded,
+              icon: LucideIcons.video300,
               gradient: AppColors.orangeGradient,
               title: 'Video script',
               body: _videoScript,
             ),
             const SizedBox(height: AppSpacing.sm),
             _OutputSection(
-              icon: Icons.chat_bubble_rounded,
+              icon: LucideIcons.messageCircle300,
               gradient: AppColors.tealGradient,
               title: 'WhatsApp promo',
               body: _whatsappPromo,
             ),
             const SizedBox(height: AppSpacing.sm),
             GlassCard(
-              borderRadius: 20,
+              borderRadius: 24,
               padding: const EdgeInsets.all(16),
               semanticLabel: 'Suggested tags',
               child: Column(
@@ -119,14 +138,19 @@ class _PawSnapViewState extends State<PawSnapView> {
                     runSpacing: 8,
                     children: _tags.map((tag) {
                       return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.tealStart.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: Text(
                           tag,
-                          style: AppTextStyles.chipLabel.copyWith(color: AppColors.tealStart),
+                          style: AppTextStyles.chipLabel.copyWith(
+                            color: AppColors.tealStart,
+                          ),
                         ),
                       );
                     }).toList(),
@@ -150,12 +174,17 @@ class _PawSnapViewState extends State<PawSnapView> {
             onPressed: enabled ? () => _toast('Posting to TikTok…') : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.textPrimary,
-              disabledBackgroundColor: AppColors.textPrimary.withValues(alpha: 0.25),
+              disabledBackgroundColor: AppColors.textPrimary.withValues(
+                alpha: 0.25,
+              ),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              side: const BorderSide(color: AppColors.gold, width: 1.5),
               elevation: 0,
             ),
-            icon: const Icon(Icons.music_note_rounded),
+            icon: const Icon(LucideIcons.music300, color: AppColors.gold),
             label: Text('Post to TikTok', style: AppTextStyles.buttonLabel),
           ),
         ),
@@ -167,21 +196,30 @@ class _PawSnapViewState extends State<PawSnapView> {
             opacity: enabled ? 1 : 0.35,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                gradient: AppColors.orangeGradient,
-                borderRadius: BorderRadius.circular(20),
+                color: AppColors.deepOlive,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: AppColors.gold, width: 1.5),
               ),
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: enabled ? () => _toast('Pushing to AI Livestream…') : null,
+                  borderRadius: BorderRadius.circular(24),
+                  onTap: enabled
+                      ? () => _toast('Pushing to AI Livestream…')
+                      : null,
                   child: Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.podcasts_rounded, color: Colors.white),
+                        const Icon(
+                          LucideIcons.sparkles300,
+                          color: AppColors.gold,
+                        ),
                         const SizedBox(width: 8),
-                        Text('Push to AI Livestream', style: AppTextStyles.buttonLabel),
+                        Text(
+                          'Generate campaign ideas',
+                          style: AppTextStyles.buttonLabel,
+                        ),
                       ],
                     ),
                   ),
@@ -196,7 +234,11 @@ class _PawSnapViewState extends State<PawSnapView> {
 
   void _toast(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating, backgroundColor: AppColors.textPrimary),
+      SnackBar(
+        content: Text(msg),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppColors.textPrimary,
+      ),
     );
   }
 }
@@ -204,7 +246,11 @@ class _PawSnapViewState extends State<PawSnapView> {
 /// Camera box: empty capture prompt, or the captured product photo with
 /// a retake affordance once a photo has been taken.
 class _CameraViewfinder extends StatelessWidget {
-  const _CameraViewfinder({required this.state, required this.onCapture, required this.onRetake});
+  const _CameraViewfinder({
+    required this.state,
+    required this.onCapture,
+    required this.onRetake,
+  });
 
   final _GenState state;
   final VoidCallback onCapture;
@@ -215,7 +261,9 @@ class _CameraViewfinder extends StatelessWidget {
     final hasPhoto = state != _GenState.empty;
 
     return Semantics(
-      label: hasPhoto ? 'Captured product photo' : 'Empty camera viewfinder, tap to capture a product photo',
+      label: hasPhoto
+          ? 'Captured product photo'
+          : 'Empty camera viewfinder, tap to capture a product photo',
       child: Container(
         height: 220,
         width: double.infinity,
@@ -223,23 +271,35 @@ class _CameraViewfinder extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           gradient: hasPhoto
               ? const LinearGradient(
-                  colors: [Color(0xFFFBCFE8), Color(0xFFF472B6)],
-                  begin: Alignment.topLeft, end: Alignment.bottomRight)
+                  colors: [AppColors.confettiPink, Color(0xFFF6B7C2)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
               : null,
           color: hasPhoto ? null : Colors.white.withValues(alpha: 0.5),
-          border: hasPhoto ? null : Border.all(color: AppColors.textPrimary.withValues(alpha: 0.2), width: 1.5),
         ),
         child: Stack(
           children: [
             Center(
               child: hasPhoto
-                  ? Icon(Icons.checkroom_rounded, size: 84, color: Colors.white.withValues(alpha: 0.9))
+                  ? Icon(
+                      LucideIcons.shirt300,
+                      size: 84,
+                      color: AppColors.textPrimary.withValues(alpha: 0.8),
+                    )
                   : Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.add_a_photo_rounded, size: 44, color: AppColors.textPrimary.withValues(alpha: 0.35)),
+                        Icon(
+                          LucideIcons.imagePlus300,
+                          size: 44,
+                          color: AppColors.textPrimary.withValues(alpha: 0.45),
+                        ),
                         const SizedBox(height: AppSpacing.sm),
-                        Text('Tap to snap your product', style: AppTextStyles.cardSubtitle),
+                        Text(
+                          'Tap to snap your product',
+                          style: AppTextStyles.cardSubtitle,
+                        ),
                       ],
                     ),
             ),
@@ -247,7 +307,10 @@ class _CameraViewfinder extends StatelessWidget {
               Positioned.fill(
                 child: Material(
                   color: Colors.transparent,
-                  child: InkWell(borderRadius: BorderRadius.circular(24), onTap: onCapture),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(24),
+                    onTap: onCapture,
+                  ),
                 ),
               ),
             if (hasPhoto)
@@ -260,7 +323,7 @@ class _CameraViewfinder extends StatelessWidget {
                   backgroundColor: Colors.white,
                   foregroundColor: AppColors.textPrimary,
                   elevation: 2,
-                  child: const Icon(Icons.refresh_rounded),
+                  child: const Icon(LucideIcons.refreshCw300),
                 ),
               ),
           ],
@@ -271,7 +334,11 @@ class _CameraViewfinder extends StatelessWidget {
 }
 
 class _AudienceDropdown extends StatelessWidget {
-  const _AudienceDropdown({required this.selected, required this.options, required this.onChanged});
+  const _AudienceDropdown({
+    required this.selected,
+    required this.options,
+    required this.onChanged,
+  });
 
   final String selected;
   final List<String> options;
@@ -285,7 +352,6 @@ class _AudienceDropdown extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
       ),
       child: Semantics(
         label: 'Target audience selector, currently $selected',
@@ -293,10 +359,21 @@ class _AudienceDropdown extends StatelessWidget {
           child: DropdownButton<String>(
             value: selected,
             isExpanded: true,
-            icon: const Icon(Icons.expand_more_rounded, color: AppColors.textPrimary),
-            style: AppTextStyles.cardSubtitle.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+            icon: const Icon(
+              LucideIcons.chevronDown300,
+              color: AppColors.textPrimary,
+            ),
+            style: AppTextStyles.cardSubtitle.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w700,
+            ),
             items: options
-                .map((a) => DropdownMenuItem<String>(value: a, child: Text('Target audience: $a')))
+                .map(
+                  (a) => DropdownMenuItem<String>(
+                    value: a,
+                    child: Text('Target audience: $a'),
+                  ),
+                )
                 .toList(),
             onChanged: onChanged,
           ),
@@ -307,7 +384,12 @@ class _AudienceDropdown extends StatelessWidget {
 }
 
 class _OutputSection extends StatelessWidget {
-  const _OutputSection({required this.icon, required this.gradient, required this.title, required this.body});
+  const _OutputSection({
+    required this.icon,
+    required this.gradient,
+    required this.title,
+    required this.body,
+  });
 
   final IconData icon;
   final Gradient gradient;
@@ -317,7 +399,7 @@ class _OutputSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      borderRadius: 20,
+      borderRadius: 24,
       padding: const EdgeInsets.all(16),
       semanticLabel: '$title output',
       child: Column(
@@ -328,7 +410,10 @@ class _OutputSection extends StatelessWidget {
               Container(
                 width: 30,
                 height: 30,
-                decoration: BoxDecoration(shape: BoxShape.circle, gradient: gradient),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: gradient,
+                ),
                 child: Icon(icon, color: Colors.white, size: 15),
               ),
               const SizedBox(width: 10),
@@ -337,7 +422,11 @@ class _OutputSection extends StatelessWidget {
               Semantics(
                 button: true,
                 label: 'Copy $title',
-                child: Icon(Icons.copy_rounded, size: 16, color: AppColors.textPrimary.withValues(alpha: 0.5)),
+                child: Icon(
+                  LucideIcons.copy300,
+                  size: 16,
+                  color: AppColors.textPrimary.withValues(alpha: 0.5),
+                ),
               ),
             ],
           ),
@@ -356,17 +445,29 @@ class _EmptyOutputState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      borderRadius: 20,
+      borderRadius: 24,
       semanticLabel: 'No content generated yet',
       child: Column(
         children: [
-          Icon(Icons.auto_awesome_rounded, size: 32, color: AppColors.textPrimary.withValues(alpha: 0.4)),
+          Icon(
+            LucideIcons.sparkles300,
+            size: 32,
+            color: AppColors.textPrimary.withValues(alpha: 0.4),
+          ),
           const SizedBox(height: AppSpacing.sm),
-          Text('Snap a photo to generate content',
-              style: AppTextStyles.cardSubtitle.copyWith(fontWeight: FontWeight.w700), textAlign: TextAlign.center),
+          Text(
+            'Snap a photo to generate content',
+            style: AppTextStyles.cardSubtitle.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 4),
-          Text('Your video script, WhatsApp promo, and tags will appear here.',
-              style: AppTextStyles.cardSubtitle, textAlign: TextAlign.center),
+          Text(
+            'Your video script, WhatsApp promo, and tags will appear here.',
+            style: AppTextStyles.cardSubtitle,
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -380,13 +481,17 @@ class _LoadingOutputState extends StatefulWidget {
   State<_LoadingOutputState> createState() => _LoadingOutputStateState();
 }
 
-class _LoadingOutputStateState extends State<_LoadingOutputState> with SingleTickerProviderStateMixin {
+class _LoadingOutputStateState extends State<_LoadingOutputState>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..repeat(reverse: true);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    )..repeat(reverse: true);
   }
 
   @override
@@ -412,8 +517,10 @@ class _LoadingOutputStateState extends State<_LoadingOutputState> with SingleTic
                   height: 64,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: AppColors.textPrimary.withValues(alpha: opacity * 0.15),
-                    borderRadius: BorderRadius.circular(20),
+                    color: AppColors.textPrimary.withValues(
+                      alpha: opacity * 0.15,
+                    ),
+                    borderRadius: BorderRadius.circular(24),
                   ),
                   child: i == 1
                       ? Center(
@@ -422,7 +529,7 @@ class _LoadingOutputStateState extends State<_LoadingOutputState> with SingleTic
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.2,
-                              color: AppColors.textPrimary.withValues(alpha: 0.5),
+                              color: AppColors.deepOlive,
                             ),
                           ),
                         )

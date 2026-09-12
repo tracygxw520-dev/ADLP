@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../theme/app_theme.dart';
-import '../widgets/cat_mascot.dart';
 import '../widgets/glass_card.dart';
 
 class LoginView extends StatefulWidget {
@@ -26,8 +26,12 @@ class _LoginViewState extends State<LoginView> {
   }
 
   void _signIn() {
-    if (_emailController.text.trim().isEmpty || _passwordController.text.length < 4) {
-      setState(() => _errorText = 'Enter your email and a password of at least 4 characters.');
+    if (_emailController.text.trim().isEmpty ||
+        _passwordController.text.length < 4) {
+      setState(
+        () => _errorText =
+            'Enter your email and a password of at least 4 characters.',
+      );
       return;
     }
     FocusScope.of(context).unfocus();
@@ -46,17 +50,27 @@ class _LoginViewState extends State<LoginView> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 420),
                 child: GlassCard(
-                  borderRadius: 30,
+                  borderRadius: 24,
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Center(child: CatMascot(size: 76)),
+                      const Center(
+                        child: Icon(
+                          LucideIcons.megaphone300,
+                          size: 64,
+                          color: AppColors.deepOlive,
+                        ),
+                      ),
                       const SizedBox(height: AppSpacing.md),
-                      Text('Welcome to PawBoleh', style: AppTextStyles.cardTitle, textAlign: TextAlign.center),
+                      Text(
+                        'Welcome to Gema',
+                        style: AppTextStyles.cardTitle,
+                        textAlign: TextAlign.center,
+                      ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        'Sign in to create content and keep Paw Live moving for Kirana Atelier.',
+                        'Sign in to create content and keep your Gema Live moving.',
                         style: AppTextStyles.cardSubtitle,
                         textAlign: TextAlign.center,
                       ),
@@ -64,7 +78,7 @@ class _LoginViewState extends State<LoginView> {
                       _LoginField(
                         controller: _emailController,
                         label: 'Email',
-                        hintText: 'you@kiranaatelier.com',
+                        hintText: 'you@yourbrand.com',
                         keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: AppSpacing.md),
@@ -74,15 +88,28 @@ class _LoginViewState extends State<LoginView> {
                         hintText: 'Enter your password',
                         obscureText: _obscurePassword,
                         suffixIcon: IconButton(
-                          tooltip: _obscurePassword ? 'Show password' : 'Hide password',
-                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                          icon: Icon(_obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded),
+                          tooltip: _obscurePassword
+                              ? 'Show password'
+                              : 'Hide password',
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
+                          icon: Icon(
+                            _obscurePassword
+                                ? LucideIcons.eyeOff300
+                                : LucideIcons.eye300,
+                          ),
                         ),
                         onSubmitted: (_) => _signIn(),
                       ),
                       if (_errorText != null) ...[
                         const SizedBox(height: AppSpacing.sm),
-                        Text(_errorText!, style: AppTextStyles.chipLabel.copyWith(color: AppColors.liveRed)),
+                        Text(
+                          _errorText!,
+                          style: AppTextStyles.chipLabel.copyWith(
+                            color: AppColors.liveRed,
+                          ),
+                        ),
                       ],
                       const SizedBox(height: AppSpacing.lg),
                       SizedBox(
@@ -92,15 +119,22 @@ class _LoginViewState extends State<LoginView> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.tealStart,
                             foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                           ),
-                          child: Text('Sign in', style: AppTextStyles.buttonLabel),
+                          child: Text(
+                            'Sign in',
+                            style: AppTextStyles.buttonLabel,
+                          ),
                         ),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       Text(
                         'Demo access: use any email and a 4-character password.',
-                        style: AppTextStyles.chipLabel.copyWith(color: AppColors.textPrimary.withValues(alpha: 0.55)),
+                        style: AppTextStyles.chipLabel.copyWith(
+                          color: AppColors.textPrimary.withValues(alpha: 0.55),
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -151,8 +185,14 @@ class _LoginField extends StatelessWidget {
             suffixIcon: suffixIcon,
             filled: true,
             fillColor: Colors.white.withValues(alpha: 0.58),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.md,
+            ),
           ),
         ),
       ],

@@ -1,17 +1,18 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
-/// A reusable frosted-glass container used throughout PawBoleh.
+/// A reusable frosted-glass container used throughout Gema.
 ///
 /// Wraps [child] in a blurred, semi-transparent, rounded surface with a
-/// soft border and shadow. Optionally accepts a background [gradient]
+/// soft shadow. Optionally accepts a background [gradient]
 /// that tints the glass, and an [onTap] callback for interactive cards.
 class GlassCard extends StatelessWidget {
   const GlassCard({
     super.key,
     required this.child,
     this.gradient,
-    this.borderRadius = 28,
+    this.borderRadius = 24,
     this.blurSigma = 10,
     this.padding = const EdgeInsets.all(20),
     this.onTap,
@@ -42,21 +43,17 @@ class GlassCard extends StatelessWidget {
                 ? gradient!.tinted(tintOpacity)
                 : LinearGradient(
                     colors: [
-                      Colors.white.withValues(alpha: 0.35),
-                      Colors.white.withValues(alpha: 0.15),
+                      AppColors.confettiPink.withValues(alpha: 0.72),
+                      Colors.white.withValues(alpha: 0.42),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
-              width: 1.2,
-            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
             ],
           ),

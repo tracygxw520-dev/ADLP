@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pawboleh/main.dart';
 
 void main() {
@@ -15,30 +16,32 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
   }
 
-  testWidgets('Paw Live renders from the dashboard', (tester) async {
+  testWidgets('Gema Live renders from the dashboard', (tester) async {
     await tester.pumpWidget(const PawBolehApp());
     await signIn(tester);
-    expect(find.text('Good morning, Sis!'), findsOneWidget);
+    expect(find.text('Welcome back'), findsOneWidget);
 
-    await tester.tap(find.text('Paw Live').first);
+    await tester.tap(find.text('Gema Live').first);
     await tester.pump();
     expect(find.text('Admin quick-reply'), findsOneWidget);
     expect(find.text('LIVE 1.2K'), findsOneWidget);
   });
 
-  testWidgets('Paw Snap renders from the dashboard', (tester) async {
+  testWidgets('Gema Snap renders from the dashboard', (tester) async {
     await tester.pumpWidget(const PawBolehApp());
     await signIn(tester);
-    await tester.tap(find.text('Paw Snap').first);
+    await tester.tap(find.text('Gema Snap').first);
     await tester.pump();
     expect(find.text('Target audience: Gen Z'), findsOneWidget);
   });
 
-  testWidgets('notifications panel opens and marks unread items as read', (tester) async {
+  testWidgets('notifications panel opens and marks unread items as read', (
+    tester,
+  ) async {
     await tester.pumpWidget(const PawBolehApp());
     await signIn(tester);
 
-    await tester.tap(find.byIcon(Icons.notifications_none_rounded));
+    await tester.tap(find.byIcon(LucideIcons.bell300));
     await finishPanelTransition(tester);
     expect(find.text('Notifications'), findsOneWidget);
     expect(find.text('3 new updates'), findsOneWidget);
@@ -54,10 +57,10 @@ void main() {
 
     await tester.tap(find.text('KA'));
     await finishPanelTransition(tester);
-    expect(find.text('Paw Live reminders'), findsOneWidget);
+    expect(find.text('Gema Live reminders'), findsOneWidget);
 
     await tester.tap(find.text('Sign out'));
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('Welcome to PawBoleh'), findsOneWidget);
+    expect(find.text('Welcome to Gema'), findsOneWidget);
   });
 }

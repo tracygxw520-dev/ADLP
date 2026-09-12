@@ -5,23 +5,27 @@ import 'package:google_fonts/google_fonts.dart';
 /// brand (e.g. for a different MSME customer) only means editing this file.
 class AppBrand {
   AppBrand._();
-  static const String name = 'Kirana Atelier';
-  static const String greeting = 'Good morning, Sis!';
+  static const String name = 'Gema';
+  static const String greeting = 'Welcome back';
 }
 
 class AppColors {
   AppColors._();
 
-  static const Color bgStart = Color(0xFFFAF8F5);
-  static const Color bgEnd = Color(0xFFE6F4F1);
+  static const Color confettiPink = Color(0xFFFDE7EA);
+  static const Color deepOlive = Color(0xFF4A5D23);
+  static const Color gold = Color(0xFFFFD700);
 
-  static const Color textPrimary = Color(0xFF0D3B36);
+  static const Color bgStart = confettiPink;
+  static const Color bgEnd = Color(0xFFFFF8F0);
 
-  static const Color orangeStart = Color(0xFFF59E0B);
-  static const Color orangeEnd = Color(0xFFFBBF24);
+  static const Color textPrimary = deepOlive;
 
-  static const Color tealStart = Color(0xFF0F766E);
-  static const Color tealEnd = Color(0xFF14B8A6);
+  static const Color orangeStart = gold;
+  static const Color orangeEnd = Color(0xFFE8B900);
+
+  static const Color tealStart = deepOlive;
+  static const Color tealEnd = deepOlive;
 
   static const Color liveRed = Color(0xFFEF4444);
 
@@ -123,13 +127,13 @@ class AppTextStyles {
   static TextStyle chatUsername = GoogleFonts.inter(
     fontSize: 12,
     fontWeight: FontWeight.w700,
-    color: Colors.white,
+    color: AppColors.textPrimary,
   );
 
   static TextStyle chatMessage = GoogleFonts.inter(
     fontSize: 13,
     fontWeight: FontWeight.w400,
-    color: Colors.white.withValues(alpha: 0.95),
+    color: AppColors.textPrimary.withValues(alpha: 0.9),
   );
 
   static ThemeData themeData = ThemeData(

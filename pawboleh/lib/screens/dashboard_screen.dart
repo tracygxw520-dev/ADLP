@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../theme/app_theme.dart';
-import '../widgets/cat_mascot.dart';
 import '../widgets/paw_nav_card.dart';
 
 /// Dashboard tab content. Reports taps via [onNavigate] so [MainShell]
 /// can switch tabs instead of pushing a new route.
 class DashboardView extends StatelessWidget {
-  const DashboardView({super.key, required this.onNavigate, required this.onNotifications, required this.onProfile});
+  const DashboardView({
+    super.key,
+    required this.onNavigate,
+    required this.onNotifications,
+    required this.onProfile,
+  });
 
-  /// 1 = Paw Live tab, 2 = Paw Snap tab (see MainShell tab order).
+  /// 1 = Gema Live tab, 2 = Gema Snap tab (see MainShell tab order).
   final ValueChanged<int> onNavigate;
   final VoidCallback onNotifications;
   final VoidCallback onProfile;
@@ -28,24 +33,26 @@ class DashboardView extends StatelessWidget {
             const SizedBox(height: AppSpacing.xl),
             Text(
               'What are we creating today?',
-              style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w600),
+              style: AppTextStyles.subtitle.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
             PawNavCard(
-              title: 'Paw Live',
-              subtitle: '30-illustration-file, the hot release',
-              prop: CatProp.mic,
+              title: 'Gema Live',
+              subtitle: 'Launch a polished AI broadcast in moments',
+              icon: LucideIcons.megaphone300,
               gradient: AppColors.orangeGradient,
-              semanticLabel: 'Open Paw Live, AI livestream tool',
+              semanticLabel: 'Open Gema Live, AI livestream tool',
               onTap: () => onNavigate(1),
             ),
             const SizedBox(height: AppSpacing.md),
             PawNavCard(
-              title: 'Paw Snap',
-              subtitle: 'Choose one card to Paw Snap pick',
-              prop: CatProp.camera,
+              title: 'Gema Snap',
+              subtitle: 'Turn a product image into campaign-ready content',
+              icon: LucideIcons.camera300,
               gradient: AppColors.tealGradient,
-              semanticLabel: 'Open Paw Snap, content generator tool',
+              semanticLabel: 'Open Gema Snap, content generator tool',
               onTap: () => onNavigate(2),
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -78,12 +85,16 @@ class _BrandBar extends StatelessWidget {
               end: Alignment.bottomRight,
             ),
           ),
-          child: const Center(child: CatMascot(size: 18)),
+          child: const Center(
+            child: Icon(
+              LucideIcons.megaphone300,
+              size: 15,
+              color: Colors.white,
+            ),
+          ),
         ),
         const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(AppBrand.name, style: AppTextStyles.brandLabel),
-        ),
+        Expanded(child: Text(AppBrand.name, style: AppTextStyles.brandLabel)),
         Semantics(
           button: true,
           label: 'Notifications',
@@ -91,14 +102,17 @@ class _BrandBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
             onTap: onNotifications,
             child: Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.6),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.notifications_none_rounded,
-                color: AppColors.textPrimary, size: 18),
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.6),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                LucideIcons.bell300,
+                color: AppColors.textPrimary,
+                size: 18,
+              ),
             ),
           ),
         ),
@@ -112,11 +126,17 @@ class _BrandBar extends StatelessWidget {
             child: Container(
               width: 36,
               height: 36,
-              decoration: const BoxDecoration(color: AppColors.tealStart, shape: BoxShape.circle),
+              decoration: const BoxDecoration(
+                color: AppColors.tealStart,
+                shape: BoxShape.circle,
+              ),
               alignment: Alignment.center,
               child: Text(
                 'KA',
-                style: AppTextStyles.chipLabel.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
+                style: AppTextStyles.chipLabel.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),

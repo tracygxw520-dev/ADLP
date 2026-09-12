@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../theme/app_theme.dart';
 
 class _ChatMessage {
@@ -8,7 +9,7 @@ class _ChatMessage {
   final Color color;
 }
 
-/// Paw Live tab content — a livestream control surface with viewer chat,
+/// Gema Live tab content — a livestream control surface with viewer chat,
 /// admin quick-reply chips, and a message composer. Rendered as a tab
 /// body inside MainShell (no own Scaffold; the shell paints black behind
 /// the live tab).
@@ -30,8 +31,16 @@ class _PawLiveViewState extends State<PawLiveView>
   final List<_ChatMessage> _chatMessages = const [
     _ChatMessage('deniyanti', 'Boleh DM saya harga tak?', Color(0xFF60A5FA)),
     _ChatMessage('camry', 'How now, size L available?', Color(0xFFF472B6)),
-    _ChatMessage('siti_amira', 'Is this available in size M?', Color(0xFFFBBF24)),
-    _ChatMessage('aina.boutique', 'Does it come with the shawl?', Color(0xFF34D399)),
+    _ChatMessage(
+      'siti_amira',
+      'Is this available in size M?',
+      Color(0xFFFBBF24),
+    ),
+    _ChatMessage(
+      'aina.boutique',
+      'Does it come with the shawl?',
+      Color(0xFF34D399),
+    ),
     _ChatMessage('zul.hakim', 'Price for bundle of 2?', Color(0xFF60A5FA)),
     _ChatMessage('mira_wardrobe', 'Fast ship to Penang?', Color(0xFFF472B6)),
   ];
@@ -94,9 +103,9 @@ class _PawLiveViewState extends State<PawLiveView>
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withValues(alpha: 0.35),
+                AppColors.deepOlive.withValues(alpha: 0.12),
                 Colors.transparent,
-                Colors.black.withValues(alpha: 0.6),
+                AppColors.deepOlive.withValues(alpha: 0.18),
               ],
               stops: const [0.0, 0.35, 1.0],
             ),
@@ -112,60 +121,95 @@ class _PawLiveViewState extends State<PawLiveView>
           child: SafeArea(
             bottom: false,
             child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
-            child: Row(
-              children: [
-                _RoundLiveControl(
-                  icon: Icons.arrow_back_rounded,
-                  label: 'Exit Paw Live',
-                  onTap: widget.onExit,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: const BoxDecoration(
-                    color: AppColors.tealStart,
-                    shape: BoxShape.circle,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: 10,
+              ),
+              child: Row(
+                children: [
+                  _RoundLiveControl(
+                    icon: LucideIcons.arrowLeft300,
+                    label: 'Exit Gema Live',
+                    onTap: widget.onExit,
                   ),
-                  alignment: Alignment.center,
-                  child: Text('KA', style: AppTextStyles.chipLabel.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('Kirana Atelier', style: AppTextStyles.chatUsername),
-                      Text('AI host · Raya Collection', style: AppTextStyles.chipLabel.copyWith(color: Colors.white70)),
-                    ],
+                  const SizedBox(width: AppSpacing.sm),
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: const BoxDecoration(
+                      color: AppColors.tealStart,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'KA',
+                      style: AppTextStyles.chipLabel.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                   ),
-                ),
-                AnimatedBuilder(
-                  animation: _pulseController,
-                  builder: (context, child) {
-                    final glow = 5 + (_pulseController.value * 8);
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                      decoration: BoxDecoration(
-                        color: AppColors.liveRed,
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [BoxShadow(color: AppColors.liveRed.withValues(alpha: 0.55), blurRadius: glow)],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.remove_red_eye_rounded, color: Colors.white, size: 14),
-                          const SizedBox(width: 4),
-                          Text('LIVE 1.2K', style: AppTextStyles.chipLabel.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Kirana Atelier',
+                          style: AppTextStyles.chatUsername,
+                        ),
+                        Text(
+                          'AI host · Raya Collection',
+                          style: AppTextStyles.chipLabel.copyWith(
+                            color: AppColors.textPrimary.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  AnimatedBuilder(
+                    animation: _pulseController,
+                    builder: (context, child) {
+                      final glow = 5 + (_pulseController.value * 8);
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.deepOlive,
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.gold.withValues(alpha: 0.42),
+                              blurRadius: glow,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              LucideIcons.eye300,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'LIVE 1.2K',
+                              style: AppTextStyles.chipLabel.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -176,7 +220,10 @@ class _PawLiveViewState extends State<PawLiveView>
           right: 52,
           bottom: 214,
           top: MediaQuery.of(context).size.height * 0.46,
-          child: _ChatFeed(controller: _chatScrollController, messages: _chatMessages),
+          child: _ChatFeed(
+            controller: _chatScrollController,
+            messages: _chatMessages,
+          ),
         ),
 
         // Pinned bottom panel: admin quick-reply chips + message composer
@@ -187,14 +234,18 @@ class _PawLiveViewState extends State<PawLiveView>
           child: SafeArea(
             top: false,
             child: Container(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 12, AppSpacing.md, AppSpacing.md),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                12,
+                AppSpacing.md,
+                AppSpacing.md,
+              ),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.7),
+                color: AppColors.confettiPink.withValues(alpha: 0.94),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(24),
                   topRight: Radius.circular(24),
                 ),
-                border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.12))),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -202,7 +253,10 @@ class _PawLiveViewState extends State<PawLiveView>
                 children: [
                   Text(
                     'Admin quick-reply',
-                    style: AppTextStyles.chipLabel.copyWith(color: Colors.white70, fontWeight: FontWeight.w700),
+                    style: AppTextStyles.chipLabel.copyWith(
+                      color: AppColors.textPrimary.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Wrap(
@@ -215,14 +269,21 @@ class _PawLiveViewState extends State<PawLiveView>
                         label: Text(
                           label,
                           style: AppTextStyles.chipLabel.copyWith(
-                            color: isFirst ? AppColors.textPrimary : Colors.white,
+                            color: AppColors.textPrimary,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        backgroundColor: isFirst ? Colors.white : Colors.white.withValues(alpha: 0.16),
-                        side: BorderSide(color: Colors.white.withValues(alpha: isFirst ? 0 : 0.3)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        backgroundColor: isFirst
+                            ? AppColors.gold
+                            : Colors.white.withValues(alpha: 0.64),
+                        side: BorderSide.none,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 10,
+                        ),
                         onPressed: () => _handleQuickReply(label),
                       );
                     }).toList(),
@@ -232,7 +293,7 @@ class _PawLiveViewState extends State<PawLiveView>
                     height: 46,
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.12),
+                      color: Colors.white.withValues(alpha: 0.66),
                       borderRadius: BorderRadius.circular(23),
                     ),
                     child: Row(
@@ -240,10 +301,18 @@ class _PawLiveViewState extends State<PawLiveView>
                         Expanded(
                           child: TextField(
                             controller: _messageController,
-                            style: const TextStyle(color: Colors.white, fontSize: 13),
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 13,
+                            ),
                             decoration: InputDecoration(
                               hintText: 'Send a message...',
-                              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
+                              hintStyle: TextStyle(
+                                color: AppColors.textPrimary.withValues(
+                                  alpha: 0.5,
+                                ),
+                                fontSize: 13,
+                              ),
                               border: InputBorder.none,
                               isDense: true,
                             ),
@@ -257,7 +326,11 @@ class _PawLiveViewState extends State<PawLiveView>
                             onTap: _sendMessage,
                             child: const Padding(
                               padding: EdgeInsets.all(4),
-                              child: Icon(Icons.mic_rounded, color: Colors.white70, size: 20),
+                              child: Icon(
+                                LucideIcons.mic300,
+                                color: AppColors.textPrimary,
+                                size: 20,
+                              ),
                             ),
                           ),
                         ),
@@ -275,7 +348,11 @@ class _PawLiveViewState extends State<PawLiveView>
 }
 
 class _RoundLiveControl extends StatelessWidget {
-  const _RoundLiveControl({required this.icon, required this.label, required this.onTap});
+  const _RoundLiveControl({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   final IconData icon;
   final String label;
@@ -292,8 +369,11 @@ class _RoundLiveControl extends StatelessWidget {
         child: Container(
           width: 36,
           height: 36,
-          decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.36), shape: BoxShape.circle),
-          child: Icon(icon, color: Colors.white, size: 20),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.72),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: AppColors.textPrimary, size: 20),
         ),
       ),
     );
@@ -314,11 +394,15 @@ class _LiveVideoPlaceholder extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF2D2A26), Color(0xFF1A1816)],
+            colors: [AppColors.confettiPink, Color(0xFFFFF6E8)],
           ),
         ),
         child: Center(
-          child: Icon(Icons.person_outline_rounded, color: Colors.white.withValues(alpha: 0.16), size: 160),
+          child: Icon(
+            LucideIcons.user300,
+            color: AppColors.deepOlive.withValues(alpha: 0.16),
+            size: 160,
+          ),
         ),
       ),
     );
@@ -355,9 +439,12 @@ class _ChatFeed extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.3),
+                  color: Colors.white.withValues(alpha: 0.58),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: RichText(
@@ -365,9 +452,14 @@ class _ChatFeed extends StatelessWidget {
                     children: [
                       TextSpan(
                         text: '${msg.username}  ',
-                        style: AppTextStyles.chatUsername.copyWith(color: msg.color),
+                        style: AppTextStyles.chatUsername.copyWith(
+                          color: msg.color,
+                        ),
                       ),
-                      TextSpan(text: msg.message, style: AppTextStyles.chatMessage),
+                      TextSpan(
+                        text: msg.message,
+                        style: AppTextStyles.chatMessage,
+                      ),
                     ],
                   ),
                 ),

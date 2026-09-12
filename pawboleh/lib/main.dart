@@ -20,7 +20,7 @@ class _PawBolehAppState extends State<PawBolehApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PawBoleh',
+      title: 'Gema',
       debugShowCheckedModeBanner: false,
       theme: AppTextStyles.themeData,
       home: _isSignedIn

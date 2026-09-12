@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../theme/app_theme.dart';
 import 'dashboard_screen.dart';
 import 'notifications_screen.dart';
@@ -33,14 +34,15 @@ class _MainShellState extends State<MainShell> {
       body: Container(
         decoration: BoxDecoration(
           gradient: isLiveTab ? null : AppColors.backgroundGradient,
-          color: isLiveTab ? Colors.black : null,
+          color: isLiveTab ? AppColors.confettiPink : null,
         ),
         child: IndexedStack(
           index: _index,
           children: [
             DashboardView(
               onNavigate: _goToTab,
-              onNotifications: () => showSlideInPanel(context, const NotificationsPanel()),
+              onNotifications: () =>
+                  showSlideInPanel(context, const NotificationsPanel()),
               onProfile: () => showSlideInPanel(
                 context,
                 ProfilePanel(
@@ -58,28 +60,36 @@ class _MainShellState extends State<MainShell> {
       ),
       bottomNavigationBar: isLiveTab
           ? null
-          : _PawBottomNav(currentIndex: _index, onTap: _goToTab, isDark: isLiveTab),
+          : _PawBottomNav(
+              currentIndex: _index,
+              onTap: _goToTab,
+              isDark: isLiveTab,
+            ),
     );
   }
 }
 
 class _PawBottomNav extends StatelessWidget {
-  const _PawBottomNav({required this.currentIndex, required this.onTap, required this.isDark});
+  const _PawBottomNav({
+    required this.currentIndex,
+    required this.onTap,
+    required this.isDark,
+  });
 
   final int currentIndex;
   final ValueChanged<int> onTap;
   final bool isDark;
 
   static const _items = [
-    (icon: Icons.home_rounded, label: 'Home'),
-    (icon: Icons.podcasts_rounded, label: 'Paw Live'),
-    (icon: Icons.camera_alt_rounded, label: 'Paw Snap'),
+    (icon: LucideIcons.home300, label: 'Home'),
+    (icon: LucideIcons.megaphone300, label: 'Gema Live'),
+    (icon: LucideIcons.camera300, label: 'Gema Snap'),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final barColor = isDark ? Colors.black.withValues(alpha: 0.85) : Colors.white.withValues(alpha: 0.85);
-    final inactiveColor = isDark ? Colors.white54 : AppColors.textPrimary.withValues(alpha: 0.4);
+    final barColor = Colors.white.withValues(alpha: 0.78);
+    final inactiveColor = AppColors.textPrimary.withValues(alpha: 0.4);
 
     return SafeArea(
       child: Container(
@@ -88,14 +98,19 @@ class _PawBottomNav extends StatelessWidget {
         decoration: BoxDecoration(
           color: barColor,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 8))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Row(
           children: List.generate(_items.length, (i) {
             final item = _items[i];
             final active = i == currentIndex;
-            final activeGradient = i == 2 ? AppColors.tealGradient : AppColors.orangeGradient;
+            final activeGradient = AppColors.tealGradient;
 
             return Expanded(
               child: Semantics(
@@ -110,16 +125,25 @@ class _PawBottomNav extends StatelessWidget {
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(gradient: active ? activeGradient : null, shape: BoxShape.circle),
-                        child: Icon(item.icon, size: 20, color: active ? Colors.white : inactiveColor),
+                        decoration: BoxDecoration(
+                          gradient: active ? activeGradient : null,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          item.icon,
+                          size: 20,
+                          color: active ? Colors.white : inactiveColor,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         item.label,
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                          color: active ? (isDark ? Colors.white : AppColors.textPrimary) : inactiveColor,
+                          fontWeight: active
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: active ? AppColors.textPrimary : inactiveColor,
                         ),
                       ),
                     ],
