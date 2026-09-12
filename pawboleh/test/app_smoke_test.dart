@@ -27,6 +27,8 @@ void main() {
     await tester.tap(find.text('Paw Snap').last);
     await tester.pump();
     expect(find.text('Target audience: Gen Z'), findsOneWidget);
+    expect(find.text('Product name'), findsOneWidget);
+    expect(find.text('Generate Paw Snap'), findsOneWidget);
   });
 
   testWidgets('notifications panel opens and marks unread items as read', (tester) async {
